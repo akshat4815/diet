@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RenalCare Sync - 7 Day Plan</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f8fafc; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out forwards; }
+        .hidden-view { display: none !important; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-20">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-brand-900 tracking-tight flex items-center">
+                <i class="fa-solid fa-notes-medical text-brand-500 mr-2"></i>
+                RenalCare Sync
+            </h1>
+            <button id="switch-user-btn" onclick="showRoleSelection()" class="hidden-view text-sm font-semibold text-slate-500 hover:text-brand-600 transition flex items-center">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i> Switch User
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8 w-full flex-grow">
+
+        <!-- 1. ROLE SELECTION VIEW -->
+        <div id="view-role-selection" class="fade-in max-w-3xl mx-auto text-center mt-12">
+            <h2 class="text-4xl font-extrabold text-slate-800 mb-4">Who are you?</h2>
+            <p class="text-lg text-slate-500 mb-10">Select your profile to view your personalized dashboard.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div onclick="selectRole('caregiver')" class="bg-white rounded-2xl shadow-lg border border-slate-100 p-8 cursor-pointer transform hover:-translate-y-2 hover:shadow-xl transition duration-300 group">
+                    <div class="w-24 h-24 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-brand-100 transition">
+                        <i class="fa-solid fa-utensils text-4xl text-brand-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Shashi</h3>
+                    <p class="text-slate-500 font-medium">Caregiver / Chef</p>
+                </div>
+
+                <div onclick="selectRole('patient')" class="bg-white rounded-2xl shadow-lg border border-slate-100 p-8 cursor-pointer transform hover:-translate-y-2 hover:shadow-xl transition duration-300 group">
+                    <div class="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-emerald-100 transition">
+                        <i class="fa-solid fa-heart-pulse text-4xl text-emerald-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Devesh</h3>
+                    <p class="text-slate-500 font-medium">Patient</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. CAREGIVER VIEW (USER 1) -->
+        <div id="view-caregiver" class="hidden-view fade-in">
+            <div class="mb-8 border-b border-slate-200 pb-4">
+                <h2 class="text-3xl font-bold text-slate-800">Caregiver Dashboard</h2>
+                <p class="text-slate-500 mt-1">Review 7-day preparation methods and dietary restrictions.</p>
+            </div>
+
+            <!-- Global Precautions -->
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-8 shadow-sm">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-triangle-exclamation text-red-500 mt-1"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-bold text-red-800">Daily Global Restrictions</h3>
+                        <ul class="mt-1 text-sm text-red-700 list-disc list-inside">
+                            <li>Strict 1 Liter (1000ml) total fluid limit per day. Cook dals thick.</li>
+                            <li>NO Salt Substitutes (Lo-Salt). Measure a tiny pinch of regular white salt for the whole day.</li>
+                            <li>NO Tomatoes, NO Potatoes, NO Bananas. Use lemon or amchur for tanginess.</li>
+                            <li>Always sift wheat flour (atta) to remove bran before making rotis to lower phosphorus.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day Selector -->
+            <div class="flex overflow-x-auto gap-2 mb-8 pb-2 hide-scrollbar" id="caregiver-days">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Meals Container -->
+            <div id="caregiver-meal-list" class="space-y-6">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- 3. PATIENT VIEW (USER 2) -->
+        <div id="view-patient" class="hidden-view fade-in">
+            <div class="mb-8 border-b border-slate-200 pb-4 flex flex-col md:flex-row md:items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-800">Patient Schedule</h2>
+                    <p class="text-slate-500 mt-1">Your 7-day overview for diet, fluids, and movement.</p>
+                </div>
+                <div class="mt-4 md:mt-0 bg-white border border-emerald-100 p-4 rounded-xl shadow-sm min-w-[250px]">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="font-bold text-emerald-900"><i class="fa-solid fa-droplet text-emerald-500 mr-1"></i> Daily Fluid</span>
+                        <span class="text-sm font-bold text-slate-500">Max 1000 ml</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-3">
+                        <div class="bg-gradient-to-r from-emerald-400 to-emerald-600 h-3 rounded-full" style="width: 25%"></div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2 text-center">Includes water, tea, and whey protein water.</p>
+                </div>
+            </div>
+
+            <!-- Day Selector -->
+            <div class="flex overflow-x-auto gap-2 mb-8 pb-2 hide-scrollbar" id="patient-days">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column: Meals -->
+                <div class="lg:col-span-1 space-y-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">
+                        <i class="fa-solid fa-utensils text-emerald-500 mr-2"></i> Meals Today
+                    </h3>
+                    <div id="patient-meal-list" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Workouts -->
+                <div class="lg:col-span-2">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">
+                        <i class="fa-solid fa-person-walking text-brand-500 mr-2"></i> Safe Movement Plan
+                    </h3>
+                    
+                    <!-- CRITICAL Fistula Warning (Always Visible) -->
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6 rounded-r-lg shadow-sm">
+                        <div class="flex">
+                            <i class="fa-solid fa-circle-exclamation text-yellow-600 mt-1"></i>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-bold text-yellow-800">Right Arm Fistula Protection</h3>
+                                <p class="text-sm text-yellow-700 mt-1">Do NOT perform any exercises that put pressure on the right arm. No tight clothing, no blood pressure cuffs, and absolutely no weightlifting or resting body weight on the right side.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Workout Container -->
+                    <div id="patient-workout-container">
+                        <!-- Workouts populated by JS based on Dialysis vs Non-Dialysis days -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- 7-DAY DATA MODEL ---
+        const weeklyPlan = {
+            Monday: {
+                isDialysis: true,
+                meals: [
+                    { time: "06:00 AM", type: "Pre-Dialysis", food: "1 small cup tea (minimal milk) + 2 plain Marie biscuits", prep: "Serve simple to keep stomach mostly empty.", precautions: "Do not feed a heavy meal to prevent blood pressure crashing during dialysis." },
+                    { time: "01:00 PM", type: "Post-Dialysis Lunch", food: "2 thin sifted-atta rotis + 1 bowl Soya Chunks dry sabzi + 1/2 cup sliced cucumbers", prep: "Cook soya chunks with cumin and turmeric. No gravy.", precautions: "Rotis must be made from sifted flour. Keep sabzi dry to limit fluids." },
+                    { time: "05:00 PM", type: "Evening Snack", food: "1 scoop Whey Protein Isolate + 1/2 apple (peeled)", prep: "Mix whey strictly in 100ml water.", precautions: "Peel the apple to reduce potassium. Ensure whey is ISOLATE, not concentrate." },
+                    { time: "07:30 PM", type: "Dinner", food: "1 small bowl white rice + 1 katori thick yellow Moong Dal + 1/2 katori Lauki sabzi", prep: "Boil dal until thick, discard soaking water first. Cook lauki simply.", precautions: "White rice only. Keep dal very thick." }
+                ]
+            },
+            Tuesday: {
+                isDialysis: false,
+                meals: [
+                    { time: "07:00 AM", type: "Morning", food: "1 small cup tea (minimal milk) + 2 Marie biscuits", prep: "Standard preparation.", precautions: "Limit milk to 1-2 tablespoons." },
+                    { time: "09:00 AM", type: "Breakfast", food: "1 medium plate Poha", prep: "Cook flattened rice with onions, mustard seeds, and turmeric.", precautions: "NO peanuts, NO potatoes, NO peas (high potassium/phosphorus)." },
+                    { time: "01:00 PM", type: "Lunch", food: "2 thin rotis + 1 katori Tofu Bhurji + 1 katori leached Parwal sabzi", prep: "Crumble tofu with onions/green chilies. Leach parwal (soak 2 hrs, boil, discard water).", precautions: "Use Tofu instead of Paneer (lower phosphorus). Must leach the parwal." },
+                    { time: "05:00 PM", type: "Evening Snack", food: "1 scoop Whey Protein Isolate + 1 small bowl roasted Makhana", prep: "Dry roast makhana without salt.", precautions: "Mix whey in max 100ml water." },
+                    { time: "07:30 PM", type: "Dinner", food: "2 thin rotis + 1 katori Patta Gobhi (cabbage) sabzi", prep: "Stir fry cabbage with minimal oil.", precautions: "No tomatoes in the sabzi." }
+                ]
+            },
+            Wednesday: {
+                isDialysis: true,
+                meals: [
+                    { time: "06:00 AM", type: "Pre-Dialysis", food: "1 small cup tea + 2 low-sodium rusks", prep: "Serve simple.", precautions: "Keep stomach empty for the machine." },
+                    { time: "01:00 PM", type: "Post-Dialysis Lunch", food: "1 small bowl white rice + 1 katori thick washed Masoor dal + 1/2 katori leached Carrots dry sabzi", prep: "Soak dal for 2 hrs, discard water. Cook thick. Leach carrots.", precautions: "Mandatory leaching for carrots to remove potassium." },
+                    { time: "05:00 PM", type: "Evening Snack", food: "1 scoop Whey Protein Isolate + 1 slice Papaya", prep: "Mix whey in 100ml water.", precautions: "Measure the papaya slice strictly." },
+                    { time: "07:30 PM", type: "Dinner", food: "2 thin rotis + 1 katori Tori (ridge gourd) sabzi", prep: "Cook tori with dry spices.", precautions: "Tori releases water naturally, do not add extra water while cooking." }
+                ]
+            },
+            Thursday: {
+                isDialysis: false,
+                meals: [
+                    { time: "07:00 AM", type: "Morning", food: "1 small cup tea + 2 Marie biscuits", prep: "Standard preparation.", precautions: "Limit milk." },
+                    { time: "09:00 AM", type: "Breakfast", food: "2 Besan Chillas (gram flour pancakes)", prep: "Cook in very little oil on a non-stick pan.", precautions: "Keep oil to a minimum to manage obesity." },
+                    { time: "01:00 PM", type: "Lunch", food: "2 thin rotis + 1 katori Soya Granules (Keema) + 1/2 cup cucumber salad", prep: "Cook soya granules with onions and dry spices.", precautions: "No tomato puree in the keema." },
+                    { time: "05:00 PM", type: "Evening Snack", food: "1 scoop Whey Protein Isolate + 1 bowl roasted Murmura (puffed rice)", prep: "Toss murmura in turmeric.", precautions: "Strictly NO salt added to murmura." },
+                    { time: "07:30 PM", type: "Dinner", food: "1 small bowl white rice + 1 katori leached Bhindi (okra) sabzi", prep: "Leach bhindi, dry well, cook dry.", precautions: "White rice preferred over brown." }
+                ]
+            },
+            Friday: {
+                isDialysis: true,
+                meals: [
+                    { time: "06:00 AM", type: "Pre-Dialysis", food: "1 small cup tea + 2 plain Marie biscuits", prep: "Serve simple.", precautions: "Empty stomach protocol for blood pressure stability." },
+                    { time: "01:00 PM", type: "Post-Dialysis Lunch", food: "2 thin rotis + 1 katori dry Capsicum and Tofu sabzi", prep: "Sauté capsicum and tofu chunks.", precautions: "Tofu is safer than paneer." },
+                    { time: "05:00 PM", type: "Evening Snack", food: "1 scoop Whey Protein Isolate + 1/2 Guava", prep: "Mix whey in 100ml water.", precautions: "Remove the seeds from the guava." },
+                    { time: "07:30 PM", type: "Dinner", food: "1 small bowl white rice + 1 katori thick yellow Moong dal", prep: "Cook dal thick.", precautions: "Strictly no watery dal." }
+                ]
+            },
+            Saturday: {
+                isDialysis: false,
+                meals: [
+                    { time: "07:00 AM", type: "Morning", food: "1 small cup tea + 2 Marie biscuits", prep: "Standard.", precautions: "Limit milk." },
+                    { time: "09:00 AM", type: "Breakfast", food: "1 medium bowl Upma (roasted Sooji)", prep: "Add onions, mustard seeds. No other veggies.", precautions: "Do not add carrots or peas to the upma without leaching." },
+                    { time: "01:00 PM", type: "Lunch", food: "2 thin rotis + 1 katori Lauki sabzi with pre-soaked Chana Dal", prep: "Cook lauki with 1 tbsp of soaked chana dal for flavor.", precautions: "Ensure chana dal is well soaked and drained first." },
+                    { time: "05:00 PM", type: "Evening Snack", food: "1 scoop Whey Protein Isolate + small handful unsalted roasted chana", prep: "Serve dry.", precautions: "Ensure chana is unsalted." },
+                    { time: "07:30 PM", type: "Dinner", food: "2 thin rotis + 1 katori Phool Gobhi (cauliflower) sabzi", prep: "Leach cauliflower, then cook dry.", precautions: "Leaching cauliflower is required." }
+                ]
+            },
+            Sunday: {
+                isDialysis: false,
+                meals: [
+                    { time: "07:00 AM", type: "Morning", food: "1 small cup tea + 2 Marie biscuits", prep: "Standard.", precautions: "Limit milk." },
+                    { time: "09:00 AM", type: "Breakfast", food: "Savory Seviyan (Vermicelli)", prep: "Dry roast vermicelli. Sauté chopped onions. Add lemon juice.", precautions: "Strictly NO tomatoes. Keep dish relatively dry." },
+                    { time: "01:00 PM", type: "Lunch", food: "White Rice & Soya Chunks Curry", prep: "Make gravy using blended onion, ginger, garlic paste.", precautions: "Squeeze soya chunks tightly to remove excess water." },
+                    { time: "05:00 PM", type: "Evening Snack", food: "1 scoop Whey Protein Isolate + 1/2 Pear (peeled)", prep: "Mix whey in 100ml water.", precautions: "Peel pear to lower potassium." },
+                    { time: "07:30 PM", type: "Dinner", food: "2 thin Rotis & Tinda (Apple Gourd) sabzi", prep: "Sift atta. Cook Tinda dry.", precautions: "Remove bran from flour. Serve sabzi dry." }
+                ]
+            }
+        };
+
+        const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        let activeRole = null;
+        let activeDay = 'Sunday';
+
+        // --- DOM ELEMENTS ---
+        const viewRoleSelection = document.getElementById('view-role-selection');
+        const viewCaregiver = document.getElementById('view-caregiver');
+        const viewPatient = document.getElementById('view-patient');
+        const switchUserBtn = document.getElementById('switch-user-btn');
+        
+        const caregiverDaysContainer = document.getElementById('caregiver-days');
+        const patientDaysContainer = document.getElementById('patient-days');
+        const caregiverMealList = document.getElementById('caregiver-meal-list');
+        const patientMealList = document.getElementById('patient-meal-list');
+        const patientWorkoutContainer = document.getElementById('patient-workout-container');
+
+        // --- RENDER FUNCTIONS ---
+        function selectRole(role) {
+            activeRole = role;
+            viewRoleSelection.classList.add('hidden-view');
+            switchUserBtn.classList.remove('hidden-view');
+            
+            if (role === 'caregiver') {
+                viewCaregiver.classList.remove('hidden-view');
+                viewPatient.classList.add('hidden-view');
+                renderDayButtons(caregiverDaysContainer, 'bg-brand-600');
+                renderCaregiverContent();
+            } else if (role === 'patient') {
+                viewPatient.classList.remove('hidden-view');
+                viewCaregiver.classList.add('hidden-view');
+                renderDayButtons(patientDaysContainer, 'bg-emerald-600');
+                renderPatientContent();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showRoleSelection() {
+            activeRole = null;
+            viewCaregiver.classList.add('hidden-view');
+            viewPatient.classList.add('hidden-view');
+            switchUserBtn.classList.add('hidden-view');
+            viewRoleSelection.classList.remove('hidden-view');
+        }
+
+        function handleDayClick(day) {
+            activeDay = day;
+            if (activeRole === 'caregiver') {
+                renderDayButtons(caregiverDaysContainer, 'bg-brand-600');
+                renderCaregiverContent();
+            } else if (activeRole === 'patient') {
+                renderDayButtons(patientDaysContainer, 'bg-emerald-600');
+                renderPatientContent();
+            }
+        }
+
+        function renderDayButtons(container, activeBgClass) {
+            container.innerHTML = '';
+            daysOfWeek.forEach(day => {
+                const isDialysis = weeklyPlan[day].isDialysis;
+                const icon = isDialysis ? '<i class="fa-solid fa-hospital-user ml-1 text-xs opacity-70"></i>' : '';
+                
+                const btn = document.createElement('button');
+                btn.onclick = () => handleDayClick(day);
+                
+                if (day === activeDay) {
+                    btn.className = `day-btn active-day ${activeBgClass} text-white shadow-md px-6 py-2 rounded-full font-semibold whitespace-nowrap transition flex items-center`;
+                } else {
+                    btn.className = `day-btn px-6 py-2 rounded-full font-semibold whitespace-nowrap transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 flex items-center`;
+                }
+                btn.innerHTML = `${day} ${icon}`;
+                container.appendChild(btn);
+            });
+        }
+
+        function renderCaregiverContent() {
+            const data = weeklyPlan[activeDay];
+            let html = '';
+            
+            data.meals.forEach(meal => {
+                html += `
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/4">
+                        <span class="text-sm font-bold text-brand-600 uppercase tracking-wider">${meal.time}</span>
+                        <h4 class="text-xl font-bold text-slate-800 mt-1">${meal.type}</h4>
+                    </div>
+                    <div class="md:w-3/4 space-y-4">
+                        <div>
+                            <h5 class="font-bold text-slate-800"><i class="fa-solid fa-bell-concierge text-slate-400 mr-2"></i> Menu Item</h5>
+                            <p class="text-slate-600 mt-1">${meal.food}</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h5 class="font-bold text-slate-800"><i class="fa-solid fa-fire-burner text-slate-400 mr-2"></i> Preparation Method</h5>
+                            <p class="text-slate-600 mt-1 text-sm leading-relaxed">${meal.prep}</p>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded-lg border border-orange-100">
+                            <h5 class="font-bold text-orange-800"><i class="fa-solid fa-shield-halved text-orange-500 mr-2"></i> Precautions</h5>
+                            <p class="text-orange-700 mt-1 text-sm">${meal.precautions}</p>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            caregiverMealList.innerHTML = html;
+        }
+
+        function renderPatientContent() {
+            const data = weeklyPlan[activeDay];
+            
+            // Render Meals
+            let mealsHtml = '';
+            data.meals.forEach(meal => {
+                mealsHtml += `
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-emerald-400"></div>
+                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">${meal.time}</span>
+                    <h4 class="font-bold text-slate-800 mt-2">${meal.type}</h4>
+                    <p class="text-slate-600 text-sm mt-1">${meal.food}</p>
+                </div>`;
+            });
+            patientMealList.innerHTML = mealsHtml;
+
+            // Render Workouts based on Dialysis Status
+            if (data.isDialysis) {
+                patientWorkoutContainer.innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                    <i class="fa-solid fa-bed-pulse text-4xl text-red-400 mb-4"></i>
+                    <h4 class="text-xl font-bold text-red-800 mb-2">Rest Day: Dialysis Treatment</h4>
+                    <p class="text-red-700 max-w-md mx-auto">Today is a dialysis day. Do NOT exercise today. Your body needs all its energy for treatment, and exercising could cause a dangerous drop in blood pressure.</p>
+                </div>`;
+            } else {
+                patientWorkoutContainer.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                        <img src="/asset/seatedmarch.webp" alt="Seated Marches" class="w-full h-48 object-cover border-b border-slate-100" />
+                        <div class="p-5 flex-grow">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-lg text-slate-800">Seated Marches</h4>
+                                <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-1 rounded">3 Sets of 1 min</span>
+                            </div>
+                            <p class="text-sm text-slate-600 leading-relaxed">Sit upright in a sturdy chair. Alternate lifting your knees toward your chest as if marching in place. Keep arms relaxed to protect the fistula.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                        <img src="/asset/anklepu.gif" alt="Ankle Pumps" class="w-full h-48 object-cover border-b border-slate-100" />
+                        <div class="p-5 flex-grow">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-lg text-slate-800">Ankle Pumps</h4>
+                                <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-1 rounded">2 min per leg</span>
+                            </div>
+                            <p class="text-sm text-slate-600 leading-relaxed">Keep feet flat on the floor. Raise your heels high, then lower them. Then raise your toes. Excellent for blood flow and relieving restless legs.</p>
+                        </div>
+                    </div>
+                </div>`;
+            }
+        }
+    </script>
+</body>
+</html>
